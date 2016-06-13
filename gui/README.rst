@@ -20,10 +20,8 @@ You will need
 Usage
 ~~~~~
 
-To invoke the program on the command line, enter
+To invoke the program on the command line, enter ::
 
-```
-$ ./app.py IP PORT
-```
+    $ ./bin/hyperloop_app IP PORT
 
 where IP is the IP address of the pod and PORT is the port to bind to.

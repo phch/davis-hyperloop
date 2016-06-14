@@ -6,6 +6,7 @@ import logging
 import logging.config
 import socket
 import sys
+from ui import Ui_MainWindow
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -26,13 +27,16 @@ parser.add_argument(
 def parse_args(args):
     return parser.parse_args(args=args)
 
-def main_window(pod):
-    w = QtGui.QWidget()
-    w.resize(900, 600)
-    w.setWindowTitle('Hyperloop pod')
-    ping_btn = QtGui.QPushButton('ping', w)
-    ping_btn.clicked.connect(lambda: pod.ping())
-    return w
+class MainWindow(QtGui.QMainWindow):
+    def __init__(self, pod):
+        QtGui.QMainWindow.__init__(self)
+        self._ui = Ui_MainWindow()
+        self._ui.setupUi(self) # must come before other configuration
+        self._ui.pingButton.clicked.connect(lambda: pod.ping())
+        # TODO: The two below lines smell.
+        self._ui.ipLineEdit.setText(pod._udp._ip)
+        self._ui.portLineEdit.setText(str(pod._udp._port))
+        self.setWindowTitle('Hyperloop pod')
 
 class Udp(object):
     def __init__(self, ip, port, source):
@@ -82,7 +86,7 @@ def main():
     udp = Udp(UDP_IP, UDP_PORT, SOURCE_IP)
     pod = Pod(udp)
     app = QtGui.QApplication(sys.argv)
-    win = main_window(pod)
+    win = MainWindow(pod)
     win.show()
     sys.exit(app.exec_())
 

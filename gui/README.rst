@@ -22,6 +22,6 @@ Usage
 
 To invoke the program on the command line, enter ::
 
-    $ ./bin/hyperloop_app IP PORT
+    $ ./run.py IP PORT
 
 where IP is the IP address of the pod and PORT is the port to bind to.

@@ -1,88 +1,101 @@
 #!/usr/bin/env python3
 
-from PyQt4 import QtGui
-import argparse
+from PyQt4.QtGui import (
+    QApplication,
+    QDialog,
+    QMainWindow,
+)
 import logging
 import logging.config
-import socket
 import sys
 
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    'ip', metavar='IP', help='IP address of the pod',
-)
-parser.add_argument(
-    'port', metavar='PORT', help='port of the pod',
-)
-parser.add_argument(
-    '--log', metavar='LEVEL', help='logging level',
-    choices=list('12345'), default=2, # INFO default
-)
-parser.add_argument(
-    '--source', metavar='SOURCE_IP', help='source IP address',
-    default=8880,
-)
+from ui import Ui_MainWindow, Ui_NetworkDialog
+from .pod import Pod
+from .parser import parse_args
 
-def parse_args(args):
-    return parser.parse_args(args=args)
+class MainWindow(QMainWindow):
+    '''First application window the user sees'''
 
-def main_window(pod):
-    w = QtGui.QWidget()
-    w.resize(900, 600)
-    w.setWindowTitle('Hyperloop pod')
-    ping_btn = QtGui.QPushButton('ping', w)
-    ping_btn.clicked.connect(lambda: pod.ping())
-    return w
+    def __init__(self, pod):
+        super().__init__()
+        self._pod = pod
+        self._ui = Ui_MainWindow()
+        self._ui.setupUi(self)
+        self._ui.actionNetwork.triggered.connect(self.networkDialog)
 
-class Udp(object):
-    def __init__(self, ip, port, source):
-        self._ip = ip
-        self._port = port
-        self._source = source
-        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._sock.bind(('', source))
-        self._sock.settimeout(1e-2)
-        self._log = logging.getLogger('pod.udp')
-        self._log.debug('UDP socket bound')
+    def networkDialog(self):
+        '''Open a window for changing network settings'''
+        la = self._pod.get_local_addr()
+        ra = self._pod.get_remote_addr()
+        info = NetworkInfo(local=la, remote=ra)
+        dialog = NetworkDialog(info)
+        if dialog.exec_() == QDialog.Accepted:
+            la, old = info.local, la
+            if la != old:
+                self._pod.set_local_addr(info.local)
+            ra, old = info.remote, ra
+            if ra != old:
+                self._pod.set_remote_addr(info.remote)
 
-    def send(self, message):
-        data = None
-        try:
-            self._sock.sendto(bytes(message, 'UTF-8'), (self._ip, self._port))
-            data, _ = self._sock.recvfrom(1024)
-        except socket.timeout:
-            self._log.warning('socket timeout')
-        except socket.error as e:
-            # TODO: do something more informative
-            self._log.error(e)
-            sys.exit(1)
-        return data
+# Give this, not the whole pod, to NetworkDialog.
+class NetworkInfo:
+    def __init__(self, local, remote):
+        self.local = local
+        self.remote = remote
 
-class Pod(object):
-    def __init__(self, udp):
-        self._udp = udp
-        self._log = logging.getLogger('pod')
-        self._log.debug('setup complete')
+class NetworkDialog(QDialog):
+    '''Dialog window where the user can change hosts and ports'''
 
-    def ping(self):
-        self._log.debug('ping')
-        self._udp.send('ping')
+    def __init__(self, info):
+        super().__init__()
+        self._info = info
+        self._ui = Ui_NetworkDialog()
+        self._ui.setupUi(self)
+        (lh, lp) = self._info.local
+        self._ui.localHostLineEdit.setText(lh)
+        self._ui.localPortLineEdit.setText(str(lp))
+        (rh, rp) = self._info.remote
+        self._ui.remoteHostLineEdit.setText(rh)
+        self._ui.remotePortLineEdit.setText(str(rp))
+
+    def accept(self):
+        '''Handle the user clicking OK'''
+        # TODO: validate input
+        lh = self._ui.localHostLineEdit.text()
+        lp = self._ui.localPortLineEdit.text()
+        self._info.local = (lh, int(lp))
+        rh = self._ui.remoteHostLineEdit.text()
+        rp = self._ui.remotePortLineEdit.text()
+        self._info.remote = (rh, int(rp))
+        super().accept() # closes the window
+
+def setup_logging(level):
+    logging.config.fileConfig(
+        'logging.conf',
+        defaults={'verbosity': logging.getLevelName(level)}
+    )
+
+def local_addr(args):
+    host = 'localhost'
+    port = int(args.local_udp_port)
+    return (host, port)
+
+def remote_addr(args):
+    host = args.remote_tcp_host
+    port = int(args.remote_tcp_port)
+    return (host, port)
 
 def main():
     args = sys.argv[1:]
     args = parse_args(args)
-    UDP_IP = args.ip
-    UDP_PORT = int(args.port)
-    SOURCE_IP = args.source
-    loglevel = int(args.log) * 10
-    logging.config.fileConfig(
-        'logging.conf',
-        defaults={'verbosity': logging.getLevelName(loglevel)}
-    )
-    udp = Udp(UDP_IP, UDP_PORT, SOURCE_IP)
-    pod = Pod(udp)
-    app = QtGui.QApplication(sys.argv)
-    win = main_window(pod)
+    setup_logging(int(args.log) * 10)
+
+    la = local_addr(args)
+    ra = remote_addr(args)
+    pod = Pod(la, ra)
+
+    app = QApplication(sys.argv)
+    win = MainWindow(pod)
     win.show()
     sys.exit(app.exec_())
 

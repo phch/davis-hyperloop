@@ -66,10 +66,10 @@ void read_and_react(EthernetClient& remote) {
     } \
   } while(0)
 
-  const char *error = 0;
-  read_tag(remote, tagbuf, bytes, error);
+  const char *error;
+  error = read_tag(remote, tagbuf, bytes);
   CHECK(error);
-  read_message(remote, msgbuf, bytes, error);
+  error = read_message(remote, msgbuf, bytes);
   CHECK(error);
   react(tagbuf, msgbuf);
   return;
@@ -81,7 +81,7 @@ SLURP_INPUT:
     remote.read();
 }
 
-void read_tag(EthernetClient& remote, char* buf, int& bytes, const char*& error) {
+const char* read_tag(EthernetClient& remote, char* buf, int& bytes) {
   int i;
   char c;
   for (i = 0; i < MAX_TAG_LEN; i++) {
@@ -93,33 +93,32 @@ void read_tag(EthernetClient& remote, char* buf, int& bytes, const char*& error)
       goto OK_TAG;
     buf[i] = c;
   }
-  error = "tag too long";
-  return;
+  return "tag too long";
 
 NO_COLON:
-  error = "no colon tag terminator";
-  return;
+  return "no colon tag terminator";
 
 OK_TAG:
   buf[i] = '\0';
   Serial.print("tag: ");
   Serial.println(buf);
+  return 0;
 }
 
-void read_message(EthernetClient& remote, char* buf, int& bytes, const char*& error) {
+const char* read_message(EthernetClient& remote, char* buf, int& bytes) {
   int i;
   for (i = 0; i < MAX_MESSAGE_LEN; i++, bytes--) {
     if (bytes == 0)
       goto OK_MESSAGE;
     buf[i] = remote.read();
   }
-  error = "message too long";
-  return;
+  return "message too long";
 
 OK_MESSAGE:
   buf[i] = '\0';
   Serial.print("message: ");
   Serial.println(buf);
+  return 0;
 }
 
 void react(char* tag, char* msg) {

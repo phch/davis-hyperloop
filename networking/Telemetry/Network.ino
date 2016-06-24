@@ -1,17 +1,19 @@
 #include "Constants.h"
 #include "Network.h"
 
+#include <SPI.h>
+
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
 };
 IPAddress local_host(192, 168, 2, 5);
+IPAddress remote_host;
 
 // for receiving commands over TCP
 unsigned int local_tcp_port = 8001;
 EthernetServer tcp_server(local_tcp_port);
 
 // for sending data over UDP
-IPAddress remote_host;
 unsigned int local_udp_port = 8002;
 unsigned int remote_udp_port;
 EthernetUDP udp_client;
@@ -106,6 +108,28 @@ void react(char* tag, char* msg) {
 }
 
 void send_data() {
-  static char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1] = "XXX"; // for testing
   // TODO: get data from subsystems and actually send it
+  static bool connected = false;
+  static char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1] = "XXX"; // for testing
+
+  // Search for a client trying to connect.
+  int bytes = udp_client.parsePacket();
+  if (bytes > 0) {
+    remote_host = udp_client.remoteIP();
+    remote_udp_port = udp_client.remotePort();
+    connected = true;
+  }
+  if (!connected)
+    return;
+
+  int ok;
+  ok = udp_client.beginPacket(remote_host, remote_udp_port);
+  if (!ok) {
+    Serial.println("could not connect to remote host");
+    return;
+  }
+  udp_client.write(packetBuffer);
+  ok = udp_client.endPacket();
+  if (!ok)
+    Serial.println("failed to write packet");
 }

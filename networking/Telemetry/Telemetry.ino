@@ -3,6 +3,7 @@
 
 #include <Ethernet.h>
 #include <EthernetUdp.h> // UDP library from: bjoern@cs.stanford.edu 12/30/2008
+#include <SPI.h>
 
 void setup() {
   Serial.begin(9600);
@@ -13,6 +14,14 @@ void setup() {
   tcp_server.begin();
   Serial.print("server is at ");
   Serial.println(Ethernet.localIP());
+
+  int ok = udp_client.begin(local_udp_port);
+  if (!ok) {
+    Serial.println("no sockets available to use");
+    for (;;)
+      ;
+  }
+  Serial.println("setup complete");
 }
 
 void loop() {

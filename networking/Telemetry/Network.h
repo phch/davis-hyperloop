@@ -9,6 +9,8 @@ extern IPAddress local_host;
 // These must be visible to setup().
 extern unsigned int local_tcp_port;
 extern EthernetServer tcp_server;
+extern EthernetUDP udp_client;
+extern unsigned int local_udp_port;
 
 void recv_command();
 void send_data();

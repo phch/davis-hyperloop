@@ -1,3 +1,6 @@
+#ifndef DEBUG_H
+#define DEBUG_H
+
 #ifndef NDEBUG
 # define DEBUG_PRINT(msg) \
 do { \
@@ -7,4 +10,6 @@ do { \
 } while (0)
 #else
 # define DEBUG_PRINT(msg) ((void)0)
+#endif
+
 #endif

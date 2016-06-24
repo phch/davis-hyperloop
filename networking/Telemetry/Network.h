@@ -2,9 +2,11 @@
 #define NETWORK_H
 
 #include <Ethernet.h>
+#include <oneCAN.h>
 
 extern byte mac[];
 extern IPAddress local_host;
+extern oneCAN can;
 
 // These must be visible to setup().
 extern unsigned int local_tcp_port;

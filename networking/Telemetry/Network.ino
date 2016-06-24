@@ -1,7 +1,6 @@
 #include "Constants.h"
 #include "Network.h"
-
-#include <SPI.h>
+#include "Debug.h"
 
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
@@ -17,6 +16,24 @@ EthernetServer tcp_server(local_tcp_port);
 unsigned int local_udp_port = 8002;
 unsigned int remote_udp_port;
 EthernetUDP udp_client;
+
+oneCAN can;
+
+// for testing
+void wumpuses(oneCAN& can, char *buf) {
+  strcpy(buf, "w:666\n");
+}
+void velocity(oneCAN& can, char *buf) {
+  snprintf(buf, MAX_PACKET_LEN, "v:%f\n", can.velocity);
+  buf[MAX_PACKET_LEN - 1] = 0;
+}
+
+typedef void (*writer)(oneCAN&, char*);
+writer writers[] = {
+  velocity,
+  wumpuses,
+  0 // must be NULL-terminated
+};
 
 void recv_command() {
   static EthernetClient remote;
@@ -42,8 +59,7 @@ void read_and_react(EthernetClient& remote) {
 #define CHECK(e) \
   do { \
     if (e) { \
-      Serial.print("ERROR: "); \
-      Serial.println(e); \
+      DEBUG_PRINT(e); \
       goto SLURP_INPUT; \
     } \
   } while(0)
@@ -108,9 +124,8 @@ void react(char* tag, char* msg) {
 }
 
 void send_data() {
-  // TODO: get data from subsystems and actually send it
   static bool connected = false;
-  static char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1] = "XXX"; // for testing
+  static char packetBuffer[MAX_PACKET_LEN] = "XXX"; // for testing
 
   // Search for a client trying to connect.
   int bytes = udp_client.parsePacket();
@@ -122,14 +137,19 @@ void send_data() {
   if (!connected)
     return;
 
-  int ok;
-  ok = udp_client.beginPacket(remote_host, remote_udp_port);
-  if (!ok) {
-    Serial.println("could not connect to remote host");
-    return;
+  for (size_t i = 0; writers[i] != 0; i++) {
+    int ok;
+    ok = udp_client.beginPacket(remote_host, remote_udp_port);
+    if (!ok) {
+      DEBUG_PRINT("could not connect to remote host");
+      return;
+    }
+    writers[i](can, packetBuffer);
+    udp_client.write(packetBuffer);
+    ok = udp_client.endPacket();
+    if (!ok) {
+      DEBUG_PRINT("failed to write packet");
+      return;
+    }
   }
-  udp_client.write(packetBuffer);
-  ok = udp_client.endPacket();
-  if (!ok)
-    Serial.println("failed to write packet");
 }

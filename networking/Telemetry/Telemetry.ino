@@ -21,6 +21,8 @@ void setup() {
     for (;;)
       ;
   }
+  can.init();
+  can.beginReceiving();
   Serial.println("setup complete");
 }
 

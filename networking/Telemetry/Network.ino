@@ -17,15 +17,15 @@ unsigned int local_udp_port = 8002;
 unsigned int remote_udp_port;
 EthernetUDP udp_client;
 
-oneCAN can;
-
 // for testing
 void wumpuses(oneCAN& can, char *buf) {
   strcpy(buf, "w:666\n");
 }
+
+// TODO: tag the data, add a newline
 void velocity(oneCAN& can, char *buf) {
-  snprintf(buf, MAX_PACKET_LEN, "v:%f\n", can.velocity);
-  buf[MAX_PACKET_LEN - 1] = 0;
+  String s(can.velocity);
+  s.toCharArray(buf, MAX_PACKET_LEN);
 }
 
 typedef void (*writer)(oneCAN&, char*);

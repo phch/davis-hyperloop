@@ -5,10 +5,15 @@
 #include <EthernetUdp.h> // UDP library from: bjoern@cs.stanford.edu 12/30/2008
 #include <SPI.h>
 
+oneCAN can;
+
 void setup() {
   Serial.begin(9600);
   while (!Serial)
     ;
+  can.init();
+  can.beginReceiving();
+
   Ethernet.begin(mac, local_host);
 
   tcp_server.begin();
@@ -21,12 +26,11 @@ void setup() {
     for (;;)
       ;
   }
-  can.init();
-  can.beginReceiving();
   Serial.println("setup complete");
 }
 
 void loop() {
   recv_command();
   send_data();
+  delay(2); // prevents CAN and Ethernet code from interfering
 }

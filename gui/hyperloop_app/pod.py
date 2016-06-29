@@ -20,8 +20,33 @@ class UDP:
     def close(self):
         self._socket.close()
 
+def split(message):
+    try:
+        tag, payload = message.split(':', 1)
+    except ValueError as e: # no colon
+        msg = 'no tag separator in message "{}"'.format(message)
+        raise ValueError(msg) from e
+    return tag, payload
+
 class Filter:
-    pass # TODO: waiting to be implemented
+    def __init__(self):
+        self._handlers = {}
+
+    def add_tag(self, tag, handler):
+        if tag in self._handlers:
+            msg = 'tag "{}" already added'.format(tag)
+            raise ValueError(msg)
+        self._handlers[tag] = handler
+
+    def filter(self, message):
+        tag, payload = split(message)
+        try:
+            handler = self._handlers[tag]
+        except KeyError as e:
+            msg = 'unrecognized tag "{}" in message "{}"'
+            msg = msg.format(tag, message)
+            raise ValueError(msg) from e
+        return handler(payload)
 
 # Superclass for DataStream and ControlStream.  Implements some of their
 # common functionality.

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'network_dialog.ui'
 #
-# Created: Tue Jun 28 14:01:36 2016
+# Created: Wed Jun 29 12:29:58 2016
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!

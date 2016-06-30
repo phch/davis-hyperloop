@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created: Tue Jun 28 14:01:36 2016
+# Created: Wed Jun 29 12:29:58 2016
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -77,12 +77,7 @@ class Ui_MainWindow(object):
         self.uptimeLCD.setObjectName(_fromUtf8("uptimeLCD"))
         self.gridLayout.addWidget(self.uptimeLCD, 2, 1, 1, 2)
         self.verticalLayout.addLayout(self.gridLayout)
-        self.networkLog = QtGui.QTextBrowser(self.centralwidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.networkLog.sizePolicy().hasHeightForWidth())
-        self.networkLog.setSizePolicy(sizePolicy)
+        self.networkLog = QtGui.QPlainTextEdit(self.centralwidget)
         self.networkLog.setObjectName(_fromUtf8("networkLog"))
         self.verticalLayout.addWidget(self.networkLog)
         self.gridLayout_2.addLayout(self.verticalLayout, 2, 0, 1, 1)
@@ -128,11 +123,6 @@ class Ui_MainWindow(object):
         self.uptimeLabel.setText(_translate("MainWindow", "uptime", None))
         self.velocityLabel.setText(_translate("MainWindow", "velocity", None))
         self.heightLabel.setText(_translate("MainWindow", "height", None))
-        self.networkLog.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Sans Serif\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.velocityTab), _translate("MainWindow", "Velocity", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.heightTab), _translate("MainWindow", "Height", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.uptimeTab), _translate("MainWindow", "Uptime", None))

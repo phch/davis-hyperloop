@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from PyQt4.QtCore import QThread, pyqtSlot
 from PyQt4.QtGui import (
     QApplication,
     QDialog,
@@ -8,6 +9,7 @@ from PyQt4.QtGui import (
 import logging
 import logging.config
 import sys
+from threading import Thread
 
 from ui import Ui_MainWindow, Ui_NetworkDialog
 from .pod import Pod
@@ -22,6 +24,7 @@ class MainWindow(QMainWindow):
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
         self._ui.actionNetwork.triggered.connect(self.networkDialog)
+        pod.add_listener("*", self.appendNetworkLog)
 
     def networkDialog(self):
         '''Open a window for changing network settings'''
@@ -36,6 +39,10 @@ class MainWindow(QMainWindow):
             ra, old = info.remote, ra
             if ra != old:
                 self._pod.set_remote_addr(info.remote)
+
+    @pyqtSlot(str)
+    def appendNetworkLog(self, text):
+        self._ui.networkLog.appendPlainText(text)
 
 # Give this, not the whole pod, to NetworkDialog.
 class NetworkInfo:
@@ -86,6 +93,8 @@ def remote_addr(args):
     return (host, port)
 
 def main():
+    app = QApplication(sys.argv)
+
     args = sys.argv[1:]
     args = parse_args(args)
     setup_logging(int(args.log) * 10)
@@ -93,10 +102,16 @@ def main():
     la = local_addr(args)
     ra = remote_addr(args)
     pod = Pod(la, ra)
-
-    app = QApplication(sys.argv)
     win = MainWindow(pod)
+
+    t = QThread()
+    t.started.connect(pod.loop)
+    t.finished.connect(pod.halt)
+    app.lastWindowClosed.connect(t.quit)
+    pod.moveToThread(t)
+
     win.show()
+    t.start()
     sys.exit(app.exec_())
 
 if __name__ == '__main__':

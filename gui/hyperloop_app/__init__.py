@@ -37,8 +37,9 @@ class MainWindow(QMainWindow):
             if ra != old:
                 self._pod.set_remote_addr(info.remote)
 
-# Give this, not the whole pod, to NetworkDialog.
 class NetworkInfo:
+    '''Give this, not the whole pod, to NetworkDialog'''
+
     def __init__(self, local, remote):
         self.local = local
         self.remote = remote

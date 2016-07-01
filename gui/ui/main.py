@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created: Wed Jun 29 12:29:58 2016
+# Created: Fri Jul  1 11:55:15 2016
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -52,6 +52,8 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.heightLCD.sizePolicy().hasHeightForWidth())
         self.heightLCD.setSizePolicy(sizePolicy)
+        self.heightLCD.setNumDigits(10)
+        self.heightLCD.setSegmentStyle(QtGui.QLCDNumber.Flat)
         self.heightLCD.setObjectName(_fromUtf8("heightLCD"))
         self.gridLayout.addWidget(self.heightLCD, 1, 1, 1, 2)
         self.velocityLabel = QtGui.QLabel(self.centralwidget)
@@ -66,6 +68,8 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.velocityLCD.sizePolicy().hasHeightForWidth())
         self.velocityLCD.setSizePolicy(sizePolicy)
+        self.velocityLCD.setNumDigits(10)
+        self.velocityLCD.setSegmentStyle(QtGui.QLCDNumber.Flat)
         self.velocityLCD.setObjectName(_fromUtf8("velocityLCD"))
         self.gridLayout.addWidget(self.velocityLCD, 0, 1, 1, 2)
         self.uptimeLCD = QtGui.QLCDNumber(self.centralwidget)
@@ -74,10 +78,24 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.uptimeLCD.sizePolicy().hasHeightForWidth())
         self.uptimeLCD.setSizePolicy(sizePolicy)
+        self.uptimeLCD.setNumDigits(10)
+        self.uptimeLCD.setSegmentStyle(QtGui.QLCDNumber.Flat)
         self.uptimeLCD.setObjectName(_fromUtf8("uptimeLCD"))
         self.gridLayout.addWidget(self.uptimeLCD, 2, 1, 1, 2)
+        self.distanceLabel = QtGui.QLabel(self.centralwidget)
+        self.distanceLabel.setObjectName(_fromUtf8("distanceLabel"))
+        self.gridLayout.addWidget(self.distanceLabel, 3, 0, 1, 1, QtCore.Qt.AlignRight)
+        self.distanceLCD = QtGui.QLCDNumber(self.centralwidget)
+        self.distanceLCD.setSmallDecimalPoint(False)
+        self.distanceLCD.setNumDigits(10)
+        self.distanceLCD.setSegmentStyle(QtGui.QLCDNumber.Flat)
+        self.distanceLCD.setObjectName(_fromUtf8("distanceLCD"))
+        self.gridLayout.addWidget(self.distanceLCD, 3, 1, 1, 2)
         self.verticalLayout.addLayout(self.gridLayout)
         self.networkLog = QtGui.QPlainTextEdit(self.centralwidget)
+        self.networkLog.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+        self.networkLog.setMaximumBlockCount(50)
+        self.networkLog.setCenterOnScroll(False)
         self.networkLog.setObjectName(_fromUtf8("networkLog"))
         self.verticalLayout.addWidget(self.networkLog)
         self.gridLayout_2.addLayout(self.verticalLayout, 2, 0, 1, 1)
@@ -97,6 +115,9 @@ class Ui_MainWindow(object):
         self.uptimeTab = QtGui.QWidget()
         self.uptimeTab.setObjectName(_fromUtf8("uptimeTab"))
         self.tabWidget.addTab(self.uptimeTab, _fromUtf8(""))
+        self.tab = QtGui.QWidget()
+        self.tab.setObjectName(_fromUtf8("tab"))
+        self.tabWidget.addTab(self.tab, _fromUtf8(""))
         self.gridLayout_2.addWidget(self.tabWidget, 2, 1, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -123,9 +144,11 @@ class Ui_MainWindow(object):
         self.uptimeLabel.setText(_translate("MainWindow", "uptime", None))
         self.velocityLabel.setText(_translate("MainWindow", "velocity", None))
         self.heightLabel.setText(_translate("MainWindow", "height", None))
+        self.distanceLabel.setText(_translate("MainWindow", "distance", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.velocityTab), _translate("MainWindow", "Velocity", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.heightTab), _translate("MainWindow", "Height", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.uptimeTab), _translate("MainWindow", "Uptime", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Distance", None))
         self.menuSettings.setTitle(_translate("MainWindow", "&Settings", None))
         self.actionNetwork.setText(_translate("MainWindow", "&Network", None))
 

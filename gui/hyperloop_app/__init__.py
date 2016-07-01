@@ -25,7 +25,24 @@ class MainWindow(QMainWindow):
         self._ui.setupUi(self)
         self._ui.actionNetwork.triggered.connect(self.networkDialog)
         pod.add_listener("*", self.appendNetworkLog)
+        pod.add_listener("v", self.updateVelocityLCD)
+        pod.add_listener("h", self.updateHeightLCD)
+        pod.add_listener("d", self.updateDistanceLCD)
 
+    @pyqtSlot(str)
+    def updateVelocityLCD(self, new):
+        self._ui.velocityLCD.display(new)
+
+    @pyqtSlot(str)
+    def updateHeightLCD(self, new):
+        self._ui.heightLCD.display(new)
+
+    @pyqtSlot(str)
+    def updateDistanceLCD(self, new):
+        self._ui.distanceLCD.display(new)
+
+    # FIXME: The dialog is modal, so it blocks input to the network log.
+    # Can we allow updates to the log while keeping modality?
     def networkDialog(self):
         '''Open a window for changing network settings'''
         la = self._pod.get_local_addr()

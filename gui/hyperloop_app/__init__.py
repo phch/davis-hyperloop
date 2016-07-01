@@ -6,6 +6,7 @@ from PyQt4.QtGui import (
     QDialog,
     QMainWindow,
 )
+from pyqtgraph.console import ConsoleWidget
 import logging
 import logging.config
 import sys
@@ -20,10 +21,18 @@ class MainWindow(QMainWindow):
 
     def __init__(self, pod):
         super().__init__()
+        MainWindow.console = ConsoleWidget(
+            namespace = {
+                'pod': pod,
+                'win': self,
+            },
+            text='You can use this window to enter Python commands.')
+        MainWindow.console.setWindowTitle('Python interaction')
         self._pod = pod
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
         self._ui.actionNetwork.triggered.connect(self.networkDialog)
+        self._ui.actionConsoleOpen.triggered.connect(self.openConsole)
         pod.add_listener("*", self.appendNetworkLog)
         pod.add_listener("v", self.updateVelocityLCD)
         pod.add_listener("h", self.updateHeightLCD)
@@ -40,6 +49,10 @@ class MainWindow(QMainWindow):
     @pyqtSlot(str)
     def updateDistanceLCD(self, new):
         self._ui.distanceLCD.display(new)
+
+    def openConsole(self):
+        '''Open a console for Python interaction'''
+        MainWindow.console.show()
 
     # FIXME: The dialog is modal, so it blocks input to the network log.
     # Can we allow updates to the log while keeping modality?

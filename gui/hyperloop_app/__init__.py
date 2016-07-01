@@ -74,8 +74,9 @@ class MainWindow(QMainWindow):
     def appendNetworkLog(self, text):
         self._ui.networkLog.appendPlainText(text)
 
-# Give this, not the whole pod, to NetworkDialog.
 class NetworkInfo:
+    '''Give this, not the whole pod, to NetworkDialog'''
+
     def __init__(self, local, remote):
         self.local = local
         self.remote = remote

@@ -1,4 +1,4 @@
 all:
-	./ui/compile.sh
+	$(MAKE) -C ui
 
 .PHONY: all

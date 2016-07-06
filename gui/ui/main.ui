@@ -129,7 +129,7 @@
      </layout>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="rightColumn" stretch="2,0">
+     <layout class="QVBoxLayout" name="rightColumn" stretch="0,0">
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="sizePolicy">
@@ -145,27 +145,50 @@
          </size>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="velocityTab">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>6</horstretch>
+           <verstretch>6</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
          <attribute name="title">
           <string>Velocity</string>
          </attribute>
-         <zorder>networkLog</zorder>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="PlotWidget" name="velocityPlot"/>
+          </item>
+         </layout>
         </widget>
         <widget class="QWidget" name="heightTab">
          <attribute name="title">
           <string>Height</string>
          </attribute>
-        </widget>
-        <widget class="QWidget" name="uptimeTab">
-         <attribute name="title">
-          <string>Uptime</string>
-         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="PlotWidget" name="heightPlot"/>
+          </item>
+         </layout>
         </widget>
         <widget class="QWidget" name="distanceTab">
          <attribute name="title">
           <string>Distance</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="PlotWidget" name="distancePlot"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="uptimeTab">
+         <attribute name="title">
+          <string>Uptime</string>
          </attribute>
         </widget>
        </widget>
@@ -182,15 +205,8 @@
          <string>Summary</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="0">
-          <widget class="QLabel" name="velocityLabel">
-           <property name="text">
-            <string>velocity</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLCDNumber" name="velocityLCD">
+         <item row="2" column="1">
+          <widget class="QLCDNumber" name="uptimeLCD">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
              <horstretch>0</horstretch>
@@ -205,8 +221,15 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
-          <widget class="QLCDNumber" name="uptimeLCD">
+         <item row="0" column="0">
+          <widget class="QLabel" name="velocityLabel">
+           <property name="text">
+            <string>velocity</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLCDNumber" name="velocityLCD">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
              <horstretch>0</horstretch>
@@ -278,7 +301,6 @@
           </widget>
          </item>
         </layout>
-        <zorder></zorder>
         <zorder>velocityLabel</zorder>
         <zorder>velocityLCD</zorder>
         <zorder>heightLabel</zorder>
@@ -334,6 +356,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QGraphicsView</extends>
+   <header>pyqtgraph</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
  <buttongroups>

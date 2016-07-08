@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 
-from PyQt4.QtCore import QThread, pyqtSlot
+from PyQt4.QtCore import (
+    QObject,
+    QTimer,
+    QThread,
+    pyqtSignal,
+    pyqtSlot)
 from PyQt4.QtGui import (
     QApplication,
     QDialog,
-    QMainWindow,
-)
+    QMainWindow)
 from pyqtgraph.console import ConsoleWidget
+from pyqtgraph import PlotWidget
 import logging
 import logging.config
 import sys
@@ -16,8 +21,13 @@ from ui import Ui_MainWindow, Ui_NetworkDialog
 from .pod import Pod
 from .parser import parse_args
 
+_1s = 1000
+
 class MainWindow(QMainWindow):
     '''First application window the user sees'''
+
+    command = pyqtSignal(str, str) # (tag, payload)
+    networkUpdate = pyqtSignal(str, int) # (host, port)
 
     def __init__(self, pod):
         super().__init__()
@@ -28,15 +38,29 @@ class MainWindow(QMainWindow):
             },
             text='You can use this window to enter Python commands.')
         MainWindow.console.setWindowTitle('Python interaction')
-        self._pod = pod
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
+        self._ui.startButton.clicked.connect(pod.begin)
+        self._ui.submitButton.clicked.connect(self.submitCommand)
+        pod.connected.connect(self.enable)
         self._ui.actionNetwork.triggered.connect(self.networkDialog)
         self._ui.actionConsoleOpen.triggered.connect(self.openConsole)
-        pod.add_listener("*", self.appendNetworkLog)
-        pod.add_listener("v", self.updateVelocityLCD)
-        pod.add_listener("h", self.updateHeightLCD)
-        pod.add_listener("d", self.updateDistanceLCD)
+        pod.add_listener('*', self.appendNetworkLog)
+        pod.add_listener('v', self.updateVelocityLCD)
+        pod.add_listener('h', self.updateHeightLCD)
+        pod.add_listener('d', self.updateDistanceLCD)
+        self.command.connect(pod)
+        self.networkUpdate.connect(pod.try_connect)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self._ui.velocityPlot.update)
+        self.timer.timeout.connect(self._ui.heightPlot.update)
+        self.timer.timeout.connect(self._ui.distancePlot.update)
+        self.timer.start(_1s)
+
+    @pyqtSlot()
+    def enable(self):
+        self._ui.startButton.setDisabled(True)
+        self._ui.submitButton.setDisabled(False)
 
     @pyqtSlot(str)
     def updateVelocityLCD(self, new):
@@ -50,6 +74,16 @@ class MainWindow(QMainWindow):
     def updateDistanceLCD(self, new):
         self._ui.distanceLCD.display(new)
 
+    def submitCommand(self):
+        tag = self._ui.tagLineEdit.text()
+        body = self._ui.bodyLineEdit.text()
+        if tag == '' or body == '':
+            return
+        self.command.emit(tag, body)
+
+    def sendStartMessage(self):
+        return 'start'
+
     def openConsole(self):
         '''Open a console for Python interaction'''
         MainWindow.console.show()
@@ -58,53 +92,30 @@ class MainWindow(QMainWindow):
     # Can we allow updates to the log while keeping modality?
     def networkDialog(self):
         '''Open a window for changing network settings'''
-        la = self._pod.get_local_addr()
-        ra = self._pod.get_remote_addr()
-        info = NetworkInfo(local=la, remote=ra)
-        dialog = NetworkDialog(info)
+        dialog = NetworkDialog()
         if dialog.exec_() == QDialog.Accepted:
-            la, old = info.local, la
-            if la != old:
-                self._pod.set_local_addr(info.local)
-            ra, old = info.remote, ra
-            if ra != old:
-                self._pod.set_remote_addr(info.remote)
+            self.networkUpdate.emit(dialog.host, dialog.port)
 
     @pyqtSlot(str)
     def appendNetworkLog(self, text):
         self._ui.networkLog.appendPlainText(text)
 
-class NetworkInfo:
-    '''Give this, not the whole pod, to NetworkDialog'''
-
-    def __init__(self, local, remote):
-        self.local = local
-        self.remote = remote
-
 class NetworkDialog(QDialog):
     '''Dialog window where the user can change hosts and ports'''
 
-    def __init__(self, info):
+    def __init__(self):
         super().__init__()
-        self._info = info
+        self.host = None
+        self.port = None
         self._ui = Ui_NetworkDialog()
         self._ui.setupUi(self)
-        (lh, lp) = self._info.local
-        self._ui.localHostLineEdit.setText(lh)
-        self._ui.localPortLineEdit.setText(str(lp))
-        (rh, rp) = self._info.remote
-        self._ui.remoteHostLineEdit.setText(rh)
-        self._ui.remotePortLineEdit.setText(str(rp))
 
     def accept(self):
         '''Handle the user clicking OK'''
         # TODO: validate input
-        lh = self._ui.localHostLineEdit.text()
-        lp = self._ui.localPortLineEdit.text()
-        self._info.local = (lh, int(lp))
-        rh = self._ui.remoteHostLineEdit.text()
-        rp = self._ui.remotePortLineEdit.text()
-        self._info.remote = (rh, int(rp))
+        self.host = self._ui.remoteHostLineEdit.text()
+        self.port = self._ui.remotePortLineEdit.text()
+        self.port = int(self.port)
         super().accept() # closes the window
 
 def setup_logging(level):
@@ -113,14 +124,11 @@ def setup_logging(level):
         defaults={'verbosity': logging.getLevelName(level)}
     )
 
-def local_addr(args):
-    host = 'localhost'
-    port = int(args.local_udp_port)
-    return (host, port)
-
 def remote_addr(args):
-    host = args.remote_tcp_host
-    port = int(args.remote_tcp_port)
+    host = args.host
+    if host == 'localhost':
+        host = '127.0.0.1'
+    port = int(args.port)
     return (host, port)
 
 def main():
@@ -130,19 +138,11 @@ def main():
     args = parse_args(args)
     setup_logging(int(args.log) * 10)
 
-    la = local_addr(args)
-    ra = remote_addr(args)
-    pod = Pod(la, ra)
+    host, port = remote_addr(args)
+    pod = Pod(host, port)
     win = MainWindow(pod)
 
-    t = QThread()
-    t.started.connect(pod.loop)
-    t.finished.connect(pod.halt)
-    app.lastWindowClosed.connect(t.quit)
-    pod.moveToThread(t)
-
     win.show()
-    t.start()
     sys.exit(app.exec_())
 
 if __name__ == '__main__':

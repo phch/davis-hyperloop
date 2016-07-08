@@ -1,5 +1,16 @@
 from collections import defaultdict
-from PyQt4.QtCore import QEventLoop, QObject, QThread, pyqtSignal
+from PyQt4.QtNetwork import (
+    QHostAddress,
+    QTcpSocket,
+    QUdpSocket,
+)
+from PyQt4.QtCore import (
+    QEventLoop,
+    QObject,
+    QThread,
+    pyqtSignal,
+    pyqtSlot,
+)
 from PyQt4.QtGui import QApplication
 
 import logging
@@ -8,26 +19,30 @@ import time
 
 BUFFER_SIZE = 2 ** 10
 
-# TODO: Use QUdpSocket?
-class UDP:
-    '''UDP server
+def query_tag(tag, *subtags):
+    tag = '?' + tag
+    if subtags:
+        tag += '.' + '.'.join(subtags)
+    return tag
 
-    Handles decoding of received messages.
-    '''
-    def __init__(self, socket):
-        self._socket = socket
-        self._log = logging.getLogger('udp')
+def reply_tag(tag, *subtags):
+    tag = '!' + tag
+    if subtags:
+        tag += '.' + '.'.join(subtags)
+    return tag
 
-    def recv(self):
-        try:
-            data = self._socket.recv(BUFFER_SIZE)
-        except OSError:
-            return None
-        message = data.decode()
-        return message
+def randport():
+    from random import randrange
+    return randrange(8000, 9000)
 
-    def close(self):
-        self._socket.close()
+def bind(sock, tries=3):
+    from itertools import repeat
+    host = QHostAddress.LocalHost
+    for _ in repeat(None, tries):
+        port = randport()
+        if sock.bind(host, port):
+            return True
+    return False
 
 def split(message):
     try:
@@ -38,18 +53,24 @@ def split(message):
     return tag, payload
 
 class Messager(QObject):
-    trigger = pyqtSignal(str)
+    received = pyqtSignal(str)
 
     def connect(self, slot):
-        self.trigger.connect(slot)
+        self.received.connect(slot)
 
     def emit(self, message):
-        self.trigger.emit(message)
+        self.received.emit(message)
 
+@pyqtSlot(str)
 class Filter:
     def __init__(self):
         self._messagers = defaultdict(Messager)
         self._unfiltered = Messager()
+
+    def __call__(self, message):
+        self._unfiltered.emit(message)
+        tag, payload = split(message)
+        self._messagers[tag].emit(payload)
 
     def add_listener(self, tag, slot):
         if tag == '*':
@@ -58,150 +79,112 @@ class Filter:
             messager = self._messagers[tag]
         messager.connect(slot)
 
-    def filter(self, message):
-        tag, payload = split(message)
-        self._unfiltered.emit(payload)
-        self._messagers[tag].emit(payload)
+class UdpServer(QObject):
+    datagram = pyqtSignal(str)
 
-# Superclass for DataStream and ControlStream.  Implements some of their
-# common functionality.
-class Stream:
-    def __init__(self):
-        self._host = None
-        self._port = None
-        self._exn = None
-
-    def get_error(self):
-        return self._exn
-
-    def get_addr(self):
-        return (self._host, self._port)
-
-    def set_addr(self, addr):
-        self._host, self._port = addr
-        self.connect()
-
-class DataStream(Stream):
-    '''Connection for getting data from the pod'''
-
-    def __init__(self, local_addr):
+    def __init__(self, host):
         super().__init__()
-        self._host, self._port = local_addr
-        self._filter = Filter()
-        self._log = logging.getLogger('data')
-        self._udp = None
-        self.connect()
+        self._sock = QUdpSocket()
+        self._host = host
+        self._sock.readyRead.connect(self.recv)
+        bind(self._sock)
 
-    def connect(self):
-        msg = 'Connecting to {}:{}'.format(self._host, self._port)
-        self._log.debug(msg)
-        try:
-            sock = s.socket(s.AF_INET, s.SOCK_DGRAM)
-            sock.setblocking(False)
-            sock.bind((self._host, self._port))
-            if self._udp:
-                self._udp.close()
-            self._udp = UDP(sock)
-        except OSError as e:
-            self._log.error(e)
-            self._udp = None
-            self._exn = e
-        else:
-            self._exn = None
+    def set_host(self, host):
+        self._host = host
 
-    def add_listener(self, tag, slot):
-        self._filter.add_listener(tag, slot)
+    @pyqtSlot(str)
+    def try_connect(self, port):
+        port = int(port)
+        self._sock.writeDatagram('_:start\n', self._host, port)
 
     def recv(self):
-        message = self._udp.recv()
-        if message is None:
-            return
-        try:
-            self._filter.filter(message)
-        except ValueError as e:
-            self._log.error(e)
+        while self._sock.hasPendingDatagrams():
+            data, _, _ = self._sock.readDatagram(BUFFER_SIZE)
+            message = data.decode()
+            self.datagram.emit(message)
 
-# TODO: Use QTcpSocket?
-class TCP:
-    '''TCP client
+class TcpClient(QObject):
+    packet = pyqtSignal(str)
+    connected = pyqtSignal()
+    disconnected = pyqtSignal()
 
-    Handles encoding of sent messages.
-    '''
-
-    def __init__(self, socket):
-        self._socket = socket
+    def __init__(self, host):
+        super().__init__()
+        self._sock = QTcpSocket()
+        self._host = host
         self._log = logging.getLogger('tcp')
+        self._sock.connected.connect(self.greet)
+        self._sock.connected.connect(self.connected.emit)
+        self._sock.disconnected.connect(self.disconnected.emit)
+        self._sock.readyRead.connect(self.recv)
 
-    def send(self, message):
-        data = message.encode()
-        self._socket.send(data)
+    def set_host(self, host):
+        self._sock.disconnectFromHost()
+        self._host = host
 
-    def close(self):
-        self._socket.close()
-
-class ControlStream(Stream):
-    '''Connection for sending commands to the pod'''
-
-    def __init__(self, remote_addr):
-        self._host, self._port = remote_addr
-        self._log = logging.getLogger('control')
-        self._tcp = None
-        self.connect()
-
-    def connect(self):
-        msg = 'Connecting to {}:{}'.format(self._host, self._port)
+    def try_connect(self, port):
+        msg = 'connecting to ({}:{})'
+        msg = msg.format(self._host.toString(), port)
         self._log.debug(msg)
-        try:
-            sock = s.socket(s.AF_INET, s.SOCK_STREAM)
-            sock.connect((self._host, self._port))
-            if self._tcp:
-                self._tcp.close()
-            self._tcp = TCP(sock)
-        except OSError as e:
-            self._log.error(e)
-            self._tcp = None
-            self._exn = e
-        else:
-            self._exn = None
+        self._sock.connectToHost(self._host, port)
+        ok = self._sock.waitForConnected()
+        if not ok:
+            self._log.error('failed to connect')
+        self._log.debug('connection successful')
 
-    def send(message):
-        self._tcp.send(message)
+    def greet(self):
+        self.send(query_tag('port', 'udp'), '')
 
+    def recv(self):
+        while self._sock.canReadLine():
+            data = bytes(self._sock.readLine()) # handle QByteArray
+            message = data.decode()
+            self.packet.emit(message)
+
+    def send(self, tag, payload):
+        message = tag + ':' + payload + '\n'
+        data = message.encode()
+        self._sock.write(data)
+
+@pyqtSlot(str, str) # (tag, payload)
 class Pod(QObject):
     '''Data and control connections to the pod'''
 
-    def __init__(self, local_addr, remote_addr):
+    connected = pyqtSignal()
+
+    def __init__(self, host, port):
         super().__init__()
-        self._running = False
-        self._ds = DataStream(local_addr)
-        self._cs = ControlStream(remote_addr)
+        self._host = QHostAddress(host)
+        self._port = port
         self._log = logging.getLogger('pod')
+        self._tcp = TcpClient(self._host)
+        self._udp = UdpServer(self._host)
+        self._filter = Filter()
+        self._tcp.packet.connect(self._filter)
+        self._tcp.connected.connect(self.connected.emit)
+        self._udp.datagram.connect(self._filter)
+        self.add_listener(
+            reply_tag('port', 'udp'),
+            self._udp.try_connect)
 
-    def get_local_addr(self):
-        return self._ds.get_addr()
+    def __call__(self, tag, payload):
+        self._tcp.send(tag, payload)
 
-    def set_local_addr(self, addr):
-        self._ds.set_addr(addr)
+    @pyqtSlot()
+    def begin(self):
+        self._tcp.try_connect(self._port)
 
-    def get_remote_addr(self):
-        return self._cs.get_addr()
-
-    def set_remote_addr(self, addr):
-        self._cs.set_addr(addr)
-
-    def add_controller(self, controller):
-        pass # TODO
+    @pyqtSlot(str, int)
+    def try_connect(self, host, port):
+        if host == 'localhost':
+            host = '127.0.0.1'
+        host = QHostAddress(host)
+        if host != self._host:
+            self._tcp.set_host(host)
+            self._udp.set_host(host)
+            self._host = host
+        self._port = port
+        self.begin()
 
     def add_listener(self, tag, listener):
-        self._ds.add_listener(tag, listener)
-
-    def loop(self):
-        self._running = True
-        while self._running:
-            self._ds.recv()
-            QApplication.processEvents() # prevents sluggish UI
-
-    def halt(self):
-        old = self._running
-        self._running = False
-        return old
+        self._filter.add_listener(tag, listener)

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created: Wed Jul  6 11:35:38 2016
+# Created: Fri Jul  8 13:31:57 2016
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -74,10 +74,10 @@ class Ui_MainWindow(object):
         self.bodyLineEdit.setObjectName(_fromUtf8("bodyLineEdit"))
         self.commandForm.setWidget(1, QtGui.QFormLayout.FieldRole, self.bodyLineEdit)
         self.verticalLayout.addLayout(self.commandForm)
-        self.pushButton = QtGui.QPushButton(self.commandBox)
-        self.pushButton.setEnabled(False)
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.verticalLayout.addWidget(self.pushButton)
+        self.submitButton = QtGui.QPushButton(self.commandBox)
+        self.submitButton.setEnabled(False)
+        self.submitButton.setObjectName(_fromUtf8("submitButton"))
+        self.verticalLayout.addWidget(self.submitButton)
         self.leftColumn.addWidget(self.commandBox)
         self.networkLog = QtGui.QPlainTextEdit(self.centralwidget)
         self.networkLog.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
@@ -107,7 +107,7 @@ class Ui_MainWindow(object):
         self.velocityTab.setObjectName(_fromUtf8("velocityTab"))
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.velocityTab)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
-        self.velocityPlot = PlotWidget(self.velocityTab)
+        self.velocityPlot = TimePlot(self.velocityTab)
         self.velocityPlot.setObjectName(_fromUtf8("velocityPlot"))
         self.verticalLayout_2.addWidget(self.velocityPlot)
         self.tabWidget.addTab(self.velocityTab, _fromUtf8(""))
@@ -115,7 +115,7 @@ class Ui_MainWindow(object):
         self.heightTab.setObjectName(_fromUtf8("heightTab"))
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.heightTab)
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
-        self.heightPlot = PlotWidget(self.heightTab)
+        self.heightPlot = TimePlot(self.heightTab)
         self.heightPlot.setObjectName(_fromUtf8("heightPlot"))
         self.verticalLayout_3.addWidget(self.heightPlot)
         self.tabWidget.addTab(self.heightTab, _fromUtf8(""))
@@ -123,7 +123,7 @@ class Ui_MainWindow(object):
         self.distanceTab.setObjectName(_fromUtf8("distanceTab"))
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.distanceTab)
         self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
-        self.distancePlot = PlotWidget(self.distanceTab)
+        self.distancePlot = TimePlot(self.distanceTab)
         self.distancePlot.setObjectName(_fromUtf8("distancePlot"))
         self.verticalLayout_4.addWidget(self.distancePlot)
         self.tabWidget.addTab(self.distanceTab, _fromUtf8(""))
@@ -219,7 +219,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuConsole.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -229,7 +229,7 @@ class Ui_MainWindow(object):
         self.commandBox.setTitle(_translate("MainWindow", "Send a command", None))
         self.tagLabel.setText(_translate("MainWindow", "tag", None))
         self.bodyLabel.setText(_translate("MainWindow", "body", None))
-        self.pushButton.setText(_translate("MainWindow", "Submit", None))
+        self.submitButton.setText(_translate("MainWindow", "Submit", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.velocityTab), _translate("MainWindow", "Velocity", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.heightTab), _translate("MainWindow", "Height", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.distanceTab), _translate("MainWindow", "Distance", None))
@@ -245,4 +245,4 @@ class Ui_MainWindow(object):
         self.actionNew.setText(_translate("MainWindow", "&New", None))
         self.actionConsoleOpen.setText(_translate("MainWindow", "&Open", None))
 
-from pyqtgraph import PlotWidget
+from hyperloop_app.plot import TimePlot

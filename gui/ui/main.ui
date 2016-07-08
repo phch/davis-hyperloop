@@ -101,7 +101,7 @@
           </layout>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="submitButton">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -162,7 +162,7 @@
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="PlotWidget" name="velocityPlot"/>
+           <widget class="TimePlot" name="velocityPlot"/>
           </item>
          </layout>
         </widget>
@@ -172,7 +172,7 @@
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="PlotWidget" name="heightPlot"/>
+           <widget class="TimePlot" name="heightPlot"/>
           </item>
          </layout>
         </widget>
@@ -182,7 +182,7 @@
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
-           <widget class="PlotWidget" name="distancePlot"/>
+           <widget class="TimePlot" name="distancePlot"/>
           </item>
          </layout>
         </widget>
@@ -358,9 +358,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PlotWidget</class>
+   <class>TimePlot</class>
    <extends>QGraphicsView</extends>
-   <header>pyqtgraph</header>
+   <header>hyperloop_app.plot</header>
   </customwidget>
  </customwidgets>
  <resources/>

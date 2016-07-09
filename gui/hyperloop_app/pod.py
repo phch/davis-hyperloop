@@ -128,9 +128,10 @@ class TcpClient(QObject):
         self._log.debug(msg)
         self._sock.connectToHost(self._host, port)
         ok = self._sock.waitForConnected()
-        if not ok:
+        if ok:
+            self._log.debug('connection successful')
+        else:
             self._log.error('failed to connect')
-        self._log.debug('connection successful')
 
     def greet(self):
         self.send(query_tag('port', 'udp'), '')

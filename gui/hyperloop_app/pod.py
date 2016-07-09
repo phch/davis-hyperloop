@@ -99,9 +99,13 @@ class UdpServer(QObject):
 
     def recv(self):
         while self._sock.hasPendingDatagrams():
-            data, _, _ = self._sock.readDatagram(BUFFER_SIZE)
+            data = self._sock.readDatagram(BUFFER_SIZE)
+            data = data[0]
             message = data.decode()
-            self.datagram.emit(message)
+            for line in message.split('\n'):
+                if line == '':
+                    continue
+                self.datagram.emit(line)
 
 class TcpClient(QObject):
     packet = pyqtSignal(str)

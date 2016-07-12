@@ -5,14 +5,17 @@
 #include <EthernetUdp.h> // UDP library from: bjoern@cs.stanford.edu 12/30/2008
 #include <SPI.h>
 
-oneCAN can;
+//oneCAN can;
 
 void setup() {
   Serial.begin(9600);
   while (!Serial)
     ;
-  can.init();
-  can.beginReceiving();
+  //can.init();
+  //can.beginReceiving();
+
+  prepare_readers();
+  prepare_writers();
 
   Ethernet.begin(mac, local_host);
 

@@ -17,16 +17,6 @@ unsigned int local_udp_port = 8002;
 unsigned int remote_udp_port;
 EthernetUDP udp_client;
 
-// TODO: tag the data, add a newline
-void velocity(char *buf) {
-//  String s(can.velocity);
-//  s.toCharArray(buf, MAX_PACKET_LEN);
-}
-
-void reply_port_udp(const char *_msg, char *buf) {
-  // TODO: print "!port.udp:----", where the rest is `local_udp_port'
-}
-
 void recv_command() {
   static EthernetClient remote;
   if (!remote.connected()) {
@@ -121,6 +111,7 @@ void react(EthernetClient& remote, char* tag, char* msg) {
     DEBUG_PRINT("unrecognized tag");
     return;
   }
+  // TODO: print the tag here?
   e->reader(msg, packetBuffer);
   remote.println(packetBuffer);
 }

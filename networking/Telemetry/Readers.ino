@@ -2,13 +2,16 @@
 
 // Define readers here.
 
-// TODO: readers for 
+void reply_port_udp(const char *msg, char *buf) {
+  sprintf(buf, "!port.udp:%u", local_udp_port);
+}
 
 #define ENTRY(tag, reader_func) (struct reader_entry) {tag, reader_func}
 
 // Put each reader in this list with an appropriate tag.
 // Tags must be short and cannot contain colons (":").
 struct reader_entry readers[] = {
+  ENTRY("!port.udp", reply_port_udp),
   ENTRY(0, 0) // must be (NULL, _)-terminated
 };
 

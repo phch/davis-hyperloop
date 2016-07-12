@@ -2,7 +2,9 @@
 
 // Define writers here.
 
-// TODO: writer for velocity, height, distance, pod info (e.g. udp port), etc.
+void velocity(char *buf) {
+  sprintf(buf, "v:5");
+}
 
 #define ENTRY(tag, writer_func) (struct writer_entry) {tag, writer_func}
 

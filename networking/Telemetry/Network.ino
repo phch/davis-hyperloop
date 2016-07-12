@@ -17,24 +17,6 @@ unsigned int local_udp_port = 8002;
 unsigned int remote_udp_port;
 EthernetUDP udp_client;
 
-// for testing
-void wumpuses(oneCAN& can, char *buf) {
-  strcpy(buf, "w:666\n");
-}
-
-// TODO: tag the data, add a newline
-void velocity(oneCAN& can, char *buf) {
-  String s(can.velocity);
-  s.toCharArray(buf, MAX_PACKET_LEN);
-}
-
-typedef void (*writer)(oneCAN&, char*);
-writer writers[] = {
-  velocity,
-  wumpuses,
-  0 // must be NULL-terminated
-};
-
 void recv_command() {
   static EthernetClient remote;
   if (!remote.connected()) {
@@ -60,7 +42,7 @@ void read_and_react(EthernetClient& remote) {
   do { \
     if (e) { \
       DEBUG_PRINT(e); \
-      goto SLURP_INPUT; \
+      goto FLUSH_INPUT; \
     } \
   } while(0)
 
@@ -69,12 +51,12 @@ void read_and_react(EthernetClient& remote) {
   CHECK(error);
   error = read_message(remote, msgbuf, bytes);
   CHECK(error);
-  react(tagbuf, msgbuf);
+  react(remote, tagbuf, msgbuf);
   return;
 
 #undef CHECK
 
-SLURP_INPUT:
+FLUSH_INPUT:
   for (; bytes > 0; bytes--)
     remote.read();
 }
@@ -119,8 +101,19 @@ OK_MESSAGE:
   return 0;
 }
 
-void react(char* tag, char* msg) {
-  // TODO: actually react
+void react(EthernetClient& remote, char* tag, char* msg) {
+  static char packetBuffer[MAX_PACKET_LEN];
+  if (tag[0] == '?')
+    tag[0] = '!';
+  struct reader_entry *e = (struct reader_entry *)
+    bsearch(tag, readers, reader_count, sizeof(struct reader_entry), find_tag);
+  if (e == 0) {
+    DEBUG_PRINT("unrecognized tag");
+    return;
+  }
+  // TODO: print the tag here?
+  e->reader(msg, packetBuffer);
+  remote.println(packetBuffer);
 }
 
 void send_data() {
@@ -137,14 +130,14 @@ void send_data() {
   if (!connected)
     return;
 
-  for (size_t i = 0; writers[i] != 0; i++) {
-    int ok;
+  int ok;
+  for (size_t i = 0; writers[i].tag != 0; i++) {
     ok = udp_client.beginPacket(remote_host, remote_udp_port);
     if (!ok) {
       DEBUG_PRINT("could not connect to remote host");
       return;
     }
-    writers[i](can, packetBuffer);
+    writers[i].writer(packetBuffer);
     udp_client.write(packetBuffer);
     ok = udp_client.endPacket();
     if (!ok) {

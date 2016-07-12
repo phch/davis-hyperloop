@@ -14,6 +14,9 @@ void setup() {
   can.init();
   can.beginReceiving();
 
+  prepare_readers();
+  prepare_writers();
+
   Ethernet.begin(mac, local_host);
 
   tcp_server.begin();

@@ -1,18 +1,19 @@
 #include "Constants.h"
+#include "Debug.h"
 #include "Network.h"
 
 #include <Ethernet.h>
 #include <EthernetUdp.h> // UDP library from: bjoern@cs.stanford.edu 12/30/2008
 #include <SPI.h>
 
-oneCAN can;
+//oneCAN can;
 
 void setup() {
   Serial.begin(9600);
   while (!Serial)
     ;
-  can.init();
-  can.beginReceiving();
+  //can.init();
+  //can.beginReceiving();
 
   prepare_readers();
   prepare_writers();
@@ -29,7 +30,7 @@ void setup() {
     for (;;)
       ;
   }
-  Serial.println("setup complete");
+  debug("complete");
 }
 
 void loop() {

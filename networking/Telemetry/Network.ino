@@ -41,7 +41,7 @@ void read_and_react(EthernetClient& remote) {
 #define CHECK(e) \
   do { \
     if (e) { \
-      DEBUG_PRINT(e); \
+      debug(e); \
       goto FLUSH_INPUT; \
     } \
   } while(0)
@@ -108,7 +108,7 @@ void react(EthernetClient& remote, char* tag, char* msg) {
   struct reader_entry *e = (struct reader_entry *)
     bsearch(tag, readers, reader_count, sizeof(struct reader_entry), find_tag);
   if (e == 0) {
-    DEBUG_PRINT("unrecognized tag");
+    debug("unrecognized tag");
     return;
   }
   // TODO: print the tag here?
@@ -123,6 +123,7 @@ void send_data() {
   // Search for a client trying to connect.
   int bytes = udp_client.parsePacket();
   if (bytes > 0) {
+    Serial.println("new udp server");
     remote_host = udp_client.remoteIP();
     remote_udp_port = udp_client.remotePort();
     connected = true;
@@ -134,14 +135,14 @@ void send_data() {
   for (size_t i = 0; writers[i].tag != 0; i++) {
     ok = udp_client.beginPacket(remote_host, remote_udp_port);
     if (!ok) {
-      DEBUG_PRINT("could not connect to remote host");
+      debug("could not connect to remote host");
       return;
     }
     writers[i].writer(packetBuffer);
     udp_client.write(packetBuffer);
     ok = udp_client.endPacket();
     if (!ok) {
-      DEBUG_PRINT("failed to write packet");
+      debug("failed to write packet");
       return;
     }
   }

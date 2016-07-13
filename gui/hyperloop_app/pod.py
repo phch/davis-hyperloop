@@ -17,7 +17,7 @@ import logging
 import socket as s
 import time
 
-BUFFER_SIZE = 2 ** 10
+BUFFER_SIZE = 2 ** 9
 
 def query_tag(tag, *subtags):
     tag = '?' + tag
@@ -86,6 +86,7 @@ class UdpServer(QObject):
         super().__init__()
         self._sock = QUdpSocket()
         self._host = host
+        self._log = logging.getLogger('udp')
         self._sock.readyRead.connect(self.recv)
         bind(self._sock)
 
@@ -95,7 +96,11 @@ class UdpServer(QObject):
     @pyqtSlot(str)
     def try_connect(self, port):
         port = int(port)
-        self._sock.writeDatagram('_:start\n', self._host, port)
+        msg = 'connecting to ({}:{})'
+        msg = msg.format(self._host.toString(), port)
+        self._log.debug(msg)
+        self._sock.connectToHost(self._host, port)
+        self._sock.write('_:start\n')
 
     def recv(self):
         while self._sock.hasPendingDatagrams():

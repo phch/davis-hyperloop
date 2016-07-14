@@ -6,25 +6,321 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>588</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Hyperloop Pod</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout"/>
-   <zorder>verticalLayoutWidget</zorder>
-   <zorder>portLineEdit</zorder>
-   <zorder>verticalLayoutWidget</zorder>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <layout class="QVBoxLayout" name="leftColumn" stretch="0,0,1">
+      <item>
+       <layout class="QHBoxLayout" name="mainButtonLayout">
+        <item>
+         <widget class="QPushButton" name="startButton">
+          <property name="text">
+           <string>Begin Interaction</string>
+          </property>
+          <property name="autoExclusive">
+           <bool>false</bool>
+          </property>
+          <property name="default">
+           <bool>true</bool>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">buttonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pauseButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Idle Mode</string>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+          <property name="default">
+           <bool>false</bool>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">buttonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="commandBox">
+        <property name="title">
+         <string>Send a command</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <layout class="QFormLayout" name="commandForm">
+           <property name="fieldGrowthPolicy">
+            <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="tagLabel">
+             <property name="text">
+              <string>tag</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="tagLineEdit">
+             <property name="maxLength">
+              <number>10</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="bodyLabel">
+             <property name="text">
+              <string>body</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="bodyLineEdit">
+             <property name="maxLength">
+              <number>50</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QPushButton" name="submitButton">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Submit</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPlainTextEdit" name="networkLog">
+        <property name="textInteractionFlags">
+         <set>Qt::TextSelectableByMouse</set>
+        </property>
+        <property name="maximumBlockCount">
+         <number>50</number>
+        </property>
+        <property name="centerOnScroll">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="rightColumn" stretch="0,0">
+      <item>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>350</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="velocityTab">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>6</horstretch>
+           <verstretch>6</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <attribute name="title">
+          <string>Velocity</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="TimePlot" name="velocityPlot"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="heightTab">
+         <attribute name="title">
+          <string>Height</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="TimePlot" name="heightPlot"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="distanceTab">
+         <attribute name="title">
+          <string>Distance</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="TimePlot" name="distancePlot"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="uptimeTab">
+         <attribute name="title">
+          <string>Uptime</string>
+         </attribute>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="summaryBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="title">
+         <string>Summary</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="2" column="1">
+          <widget class="QLCDNumber" name="uptimeLCD">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="numDigits">
+            <number>10</number>
+           </property>
+           <property name="segmentStyle">
+            <enum>QLCDNumber::Flat</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="velocityLabel">
+           <property name="text">
+            <string>velocity</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLCDNumber" name="velocityLCD">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="numDigits">
+            <number>10</number>
+           </property>
+           <property name="segmentStyle">
+            <enum>QLCDNumber::Flat</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLCDNumber" name="heightLCD">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="numDigits">
+            <number>10</number>
+           </property>
+           <property name="segmentStyle">
+            <enum>QLCDNumber::Flat</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="uptimeLabel">
+           <property name="text">
+            <string>uptime</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="heightLabel">
+           <property name="text">
+            <string>height</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="distanceLabel">
+           <property name="text">
+            <string>distance</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLCDNumber" name="distanceLCD">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="smallDecimalPoint">
+            <bool>false</bool>
+           </property>
+           <property name="numDigits">
+            <number>10</number>
+           </property>
+           <property name="segmentStyle">
+            <enum>QLCDNumber::Flat</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+        <zorder>velocityLabel</zorder>
+        <zorder>velocityLCD</zorder>
+        <zorder>heightLabel</zorder>
+        <zorder>heightLCD</zorder>
+        <zorder>uptimeLabel</zorder>
+        <zorder>uptimeLCD</zorder>
+        <zorder>distanceLabel</zorder>
+        <zorder>distanceLCD</zorder>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>588</width>
      <height>20</height>
     </rect>
    </property>
@@ -34,7 +330,14 @@
     </property>
     <addaction name="actionNetwork"/>
    </widget>
+   <widget class="QMenu" name="menuConsole">
+    <property name="title">
+     <string>&amp;Console</string>
+    </property>
+    <addaction name="actionConsoleOpen"/>
+   </widget>
    <addaction name="menuSettings"/>
+   <addaction name="menuConsole"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionNetwork">
@@ -42,7 +345,27 @@
     <string>&amp;Network</string>
    </property>
   </action>
+  <action name="actionNew">
+   <property name="text">
+    <string>&amp;New</string>
+   </property>
+  </action>
+  <action name="actionConsoleOpen">
+   <property name="text">
+    <string>&amp;Open</string>
+   </property>
+  </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TimePlot</class>
+   <extends>QGraphicsView</extends>
+   <header>hyperloop_app.plot</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+ </buttongroups>
 </ui>

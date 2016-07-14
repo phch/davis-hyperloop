@@ -6,6 +6,7 @@ MCP_CAN CAN(9);
 oneCAN::oneCAN(void)
 {
 	active = this;
+	dataAvailable = false;
 }
 
 void  oneCAN::init(void)
@@ -62,12 +63,12 @@ void oneCAN::beat(unsigned int systemID)
 
 void oneCAN::beginReceiving(void)
 {
-	attachInterrupt(0, CAN_getData, FALLING);
+	attachInterrupt(0, CAN_setDataAvailable, FALLING);
 }
 
-void CAN_getData (void)
+void CAN_setDataAvailable (void)
 {
-	oneCAN::getActive()->getData();
+	oneCAN::getActive()->dataAvailable = true;
 }
 
 oneCAN* oneCAN::getActive(void)

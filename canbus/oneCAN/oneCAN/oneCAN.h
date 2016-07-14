@@ -6,6 +6,7 @@
 #include <mcp_can_dfs.h>
 
 const unsigned int CAN_motionData = 0x4;
+const unsigned int CAN_accelData = 0x5;
 const unsigned int CAN_controlsHeartbeat = 0x1;
 const unsigned int CAN_emergencyHeartbeat = 0x2;
 const unsigned int CAN_RRPEHeartbeat = 0x3;
@@ -24,6 +25,8 @@ class oneCAN
 		void beat(unsigned int systemID);
 		volatile float velocity;
 		volatile float position;
+		volatile float accelAngleX;
+		volatile float accelAngleY;
 		void getData(void);
 		bool areControlsOn(void);
 		bool isEmergencyOn(void);

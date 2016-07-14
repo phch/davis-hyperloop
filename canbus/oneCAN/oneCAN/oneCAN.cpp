@@ -108,19 +108,30 @@ void oneCAN::getData(void)
           Serial.println();
           break;
           
+	   case CAN_accelData:
+		this->accelAngleX = *(float *)this->buf;
+          this->accelAngleY = *(float *)(this->buf+4);
+          
+          Serial.print("Accelerometer data received! New X angle: ");
+          Serial.print(this->accelAngleX);
+          Serial.print(" New Y angle: ");
+          Serial.println(this->accelAngleY);
+          Serial.println();
+          break;
+          
         case CAN_controlsHeartbeat:
         	controlsHeartbeatTime = millis();
-        	Serial.println("Control heartbead detected!");
+        	Serial.println("Control heartbeat detected!");
         	break;
         	
         case CAN_emergencyHeartbeat:
         	emergencyHeartbeatTime = millis();
-        	Serial.println("Emergency heartbead detected!");
+        	Serial.println("Emergency heartbeat detected!");
         	break;
         	
         case CAN_RRPEHeartbeat:
         	RRPEHeartbeatTime = millis();
-        	Serial.println("RRPE heartbead detected!");
+        	Serial.println("RRPE heartbeat detected!");
         	break;
         	
         default:

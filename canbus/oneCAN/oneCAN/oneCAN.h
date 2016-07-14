@@ -32,6 +32,7 @@ class oneCAN
 		bool isEmergencyOn(void);
 		bool isRRPEOn(void);
 		static oneCAN* getActive(void);
+		bool dataAvailable;
 	private:
 		unsigned char len = 0;
 		unsigned char buf[8];

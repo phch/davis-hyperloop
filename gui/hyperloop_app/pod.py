@@ -1,16 +1,16 @@
 from collections import defaultdict
 from PyQt4.QtNetwork import (
+    QAbstractSocket,
     QHostAddress,
     QTcpSocket,
-    QUdpSocket,
-)
+    QUdpSocket)
 from PyQt4.QtCore import (
     QEventLoop,
     QObject,
     QThread,
+    QTimer,
     pyqtSignal,
-    pyqtSlot,
-)
+    pyqtSlot)
 from PyQt4.QtGui import QApplication
 
 import logging
@@ -95,6 +95,9 @@ class UdpServer(QObject):
 
     @pyqtSlot(str)
     def try_connect(self, port):
+        self._sock.disconnectFromHost()
+        if self._sock.state() != QAbstractSocket.UnconnectedState:
+            self._sock.waitForDisconnected()
         port = int(port)
         msg = 'connecting to ({}:{})'
         msg = msg.format(self._host.toString(), port)
@@ -120,6 +123,7 @@ class TcpClient(QObject):
     def __init__(self, host):
         super().__init__()
         self._sock = QTcpSocket()
+        self._pending = None
         self._host = host
         self._log = logging.getLogger('tcp')
         self._sock.connected.connect(self.greet)
@@ -131,16 +135,36 @@ class TcpClient(QObject):
         self._sock.disconnectFromHost()
         self._host = host
 
+    def _cancel_pending(self):
+        self._pending.stop()
+        self._pending = None
+        self._sock.connected.disconnect(self._connection_success)
+
+    @pyqtSlot()
+    def _connection_success(self):
+        self._cancel_pending()
+        self._log.debug('connection successful')
+
+    @pyqtSlot()
+    def _connection_failure(self):
+        self._cancel_pending()
+        self._log.debug('connection failed')
+
     def try_connect(self, port):
+        if self._pending:
+            self._cancel_pending()
+        self._sock.disconnectFromHost()
+        if self._sock.state() != QAbstractSocket.UnconnectedState:
+            self._sock.waitForDisconnected()
         msg = 'connecting to ({}:{})'
         msg = msg.format(self._host.toString(), port)
         self._log.debug(msg)
+        self._pending = QTimer()
+        self._pending.timeout.connect(self._connection_failure)
+        self._pending.setSingleShot(True)
+        self._sock.connected.connect(self._connection_success)
+        self._pending.start(10000)
         self._sock.connectToHost(self._host, port)
-        ok = self._sock.waitForConnected()
-        if ok:
-            self._log.debug('connection successful')
-        else:
-            self._log.error('failed to connect')
 
     def greet(self):
         self.send(query_tag('port', 'udp'), '')

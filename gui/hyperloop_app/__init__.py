@@ -91,8 +91,6 @@ class MainWindow(QMainWindow):
         '''Open a console for Python interaction'''
         MainWindow.console.show()
 
-    # FIXME: The dialog is modal, so it blocks input to the network log.
-    # Can we allow updates to the log while keeping modality?
     def networkDialog(self):
         '''Open a window for changing network settings'''
         dialog = NetworkDialog()

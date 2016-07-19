@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created: Sat Jul  9 10:40:51 2016
+# Created: Tue Jul 19 14:33:56 2016
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(588, 500)
+        MainWindow.resize(900, 600)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.centralwidget)
@@ -43,14 +43,6 @@ class Ui_MainWindow(object):
         self.buttonGroup.setObjectName(_fromUtf8("buttonGroup"))
         self.buttonGroup.addButton(self.startButton)
         self.mainButtonLayout.addWidget(self.startButton)
-        self.pauseButton = QtGui.QPushButton(self.centralwidget)
-        self.pauseButton.setEnabled(False)
-        self.pauseButton.setAutoDefault(False)
-        self.pauseButton.setDefault(False)
-        self.pauseButton.setFlat(False)
-        self.pauseButton.setObjectName(_fromUtf8("pauseButton"))
-        self.buttonGroup.addButton(self.pauseButton)
-        self.mainButtonLayout.addWidget(self.pauseButton)
         self.leftColumn.addLayout(self.mainButtonLayout)
         self.commandBox = QtGui.QGroupBox(self.centralwidget)
         self.commandBox.setObjectName(_fromUtf8("commandBox"))
@@ -197,12 +189,12 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addLayout(self.rightColumn)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 588, 20))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 900, 20))
         self.menubar.setObjectName(_fromUtf8("menubar"))
-        self.menuSettings = QtGui.QMenu(self.menubar)
-        self.menuSettings.setObjectName(_fromUtf8("menuSettings"))
         self.menuConsole = QtGui.QMenu(self.menubar)
         self.menuConsole.setObjectName(_fromUtf8("menuConsole"))
+        self.menuNetwork = QtGui.QMenu(self.menubar)
+        self.menuNetwork.setObjectName(_fromUtf8("menuNetwork"))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(MainWindow)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
@@ -213,10 +205,15 @@ class Ui_MainWindow(object):
         self.actionNew.setObjectName(_fromUtf8("actionNew"))
         self.actionConsoleOpen = QtGui.QAction(MainWindow)
         self.actionConsoleOpen.setObjectName(_fromUtf8("actionConsoleOpen"))
-        self.menuSettings.addAction(self.actionNetwork)
+        self.actionSettings = QtGui.QAction(MainWindow)
+        self.actionSettings.setObjectName(_fromUtf8("actionSettings"))
+        self.actionReconnect = QtGui.QAction(MainWindow)
+        self.actionReconnect.setObjectName(_fromUtf8("actionReconnect"))
         self.menuConsole.addAction(self.actionConsoleOpen)
-        self.menubar.addAction(self.menuSettings.menuAction())
+        self.menuNetwork.addAction(self.actionSettings)
+        self.menuNetwork.addAction(self.actionReconnect)
         self.menubar.addAction(self.menuConsole.menuAction())
+        self.menubar.addAction(self.menuNetwork.menuAction())
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
@@ -225,7 +222,6 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "Hyperloop Pod", None))
         self.startButton.setText(_translate("MainWindow", "Begin Interaction", None))
-        self.pauseButton.setText(_translate("MainWindow", "Idle Mode", None))
         self.commandBox.setTitle(_translate("MainWindow", "Send a command", None))
         self.tagLabel.setText(_translate("MainWindow", "tag", None))
         self.bodyLabel.setText(_translate("MainWindow", "body", None))
@@ -239,10 +235,12 @@ class Ui_MainWindow(object):
         self.uptimeLabel.setText(_translate("MainWindow", "uptime", None))
         self.heightLabel.setText(_translate("MainWindow", "height", None))
         self.distanceLabel.setText(_translate("MainWindow", "distance", None))
-        self.menuSettings.setTitle(_translate("MainWindow", "&Settings", None))
         self.menuConsole.setTitle(_translate("MainWindow", "&Console", None))
+        self.menuNetwork.setTitle(_translate("MainWindow", "&Network", None))
         self.actionNetwork.setText(_translate("MainWindow", "&Network", None))
         self.actionNew.setText(_translate("MainWindow", "&New", None))
         self.actionConsoleOpen.setText(_translate("MainWindow", "&Open", None))
+        self.actionSettings.setText(_translate("MainWindow", "&Settings", None))
+        self.actionReconnect.setText(_translate("MainWindow", "&Reconnect", None))
 
 from hyperloop_app.plot import TimePlot

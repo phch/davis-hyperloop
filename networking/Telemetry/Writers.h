@@ -8,11 +8,6 @@ struct writer_entry {
   writer_func writer;
 };
 
-// Declare writers here.
-// Writers are functions that take a buffer (char *) and write some data to it.
-
-void velocity(char *);
-
 struct writer_entry;
 extern struct writer_entry writers[];
 extern size_t writer_count;

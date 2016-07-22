@@ -61,14 +61,14 @@ void oneCAN::beat(unsigned int systemID)
 	Serial.println("Heartbeat sent!");
 }
 
-void oneCAN::beginReceiving(void)
-{
-	attachInterrupt(0, CAN_setDataAvailable, FALLING);
-}
-
 void CAN_setDataAvailable (void)
 {
 	oneCAN::getActive()->dataAvailable = true;
+}
+
+void oneCAN::beginReceiving(void)
+{
+	attachInterrupt(0, CAN_setDataAvailable, FALLING);
 }
 
 oneCAN* oneCAN::getActive(void)

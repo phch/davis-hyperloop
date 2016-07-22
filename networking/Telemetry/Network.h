@@ -5,11 +5,12 @@
 #include "Writers.h"
 
 #include <Ethernet.h>
-//#include <oneCAN.h>
+#include <oneCAN.h>
 
 extern byte mac[];
 extern IPAddress local_host;
-//extern oneCAN can;
+extern oneCAN can;
+extern bool telemetry_active;
 
 // These must be visible to setup().
 extern unsigned int local_tcp_port;

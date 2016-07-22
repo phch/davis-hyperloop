@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created: Tue Jul 19 14:33:56 2016
+# Created: Tue Jul 19 14:52:05 2016
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -209,9 +209,15 @@ class Ui_MainWindow(object):
         self.actionSettings.setObjectName(_fromUtf8("actionSettings"))
         self.actionReconnect = QtGui.QAction(MainWindow)
         self.actionReconnect.setObjectName(_fromUtf8("actionReconnect"))
+        self.actionTelemetry_Off = QtGui.QAction(MainWindow)
+        self.actionTelemetry_Off.setObjectName(_fromUtf8("actionTelemetry_Off"))
+        self.actionTelemetry_On = QtGui.QAction(MainWindow)
+        self.actionTelemetry_On.setObjectName(_fromUtf8("actionTelemetry_On"))
         self.menuConsole.addAction(self.actionConsoleOpen)
         self.menuNetwork.addAction(self.actionSettings)
         self.menuNetwork.addAction(self.actionReconnect)
+        self.menuNetwork.addAction(self.actionTelemetry_Off)
+        self.menuNetwork.addAction(self.actionTelemetry_On)
         self.menubar.addAction(self.menuConsole.menuAction())
         self.menubar.addAction(self.menuNetwork.menuAction())
 
@@ -242,5 +248,7 @@ class Ui_MainWindow(object):
         self.actionConsoleOpen.setText(_translate("MainWindow", "&Open", None))
         self.actionSettings.setText(_translate("MainWindow", "&Settings", None))
         self.actionReconnect.setText(_translate("MainWindow", "&Reconnect", None))
+        self.actionTelemetry_Off.setText(_translate("MainWindow", "Telemetry Off", None))
+        self.actionTelemetry_On.setText(_translate("MainWindow", "Telemetry On", None))
 
 from hyperloop_app.plot import TimePlot

@@ -17,6 +17,8 @@ unsigned int local_udp_port = 8002;
 unsigned int remote_udp_port;
 EthernetUDP udp_client;
 
+bool telemetry_active = true;
+
 void recv_command() {
   static EthernetClient remote;
   if (!remote.connected()) {
@@ -73,10 +75,10 @@ const char* read_tag(EthernetClient& remote, char* buf, int& bytes) {
       goto OK_TAG;
     buf[i] = c;
   }
-  return "tag too long";
+  return "tag too long\n";
 
 NO_COLON:
-  return "no colon tag terminator";
+  return "no colon tag terminator\n";
 
 OK_TAG:
   buf[i] = '\0';
@@ -92,7 +94,7 @@ const char* read_message(EthernetClient& remote, char* buf, int& bytes) {
       goto OK_MESSAGE;
     buf[i] = remote.read();
   }
-  return "message too long";
+  return "message too long\n";
 
 OK_MESSAGE:
   buf[i] = '\0';
@@ -108,7 +110,7 @@ void react(EthernetClient& remote, char* tag, char* msg) {
   struct reader_entry *e = (struct reader_entry *)
     bsearch(tag, readers, reader_count, sizeof(struct reader_entry), find_tag);
   if (e == 0) {
-    debug("unrecognized tag");
+    debug("unrecognized tag\n");
     return;
   }
   // TODO: print the tag here?
@@ -118,7 +120,7 @@ void react(EthernetClient& remote, char* tag, char* msg) {
 
 void send_data() {
   static bool connected = false;
-  static char packetBuffer[MAX_PACKET_LEN] = "XXX"; // for testing
+  static char packetBuffer[MAX_PACKET_LEN] = "XXX:XXX"; // for testing
 
   // Search for a client trying to connect.
   int bytes = udp_client.parsePacket();
@@ -128,21 +130,21 @@ void send_data() {
     remote_udp_port = udp_client.remotePort();
     connected = true;
   }
-  if (!connected)
+  if (!connected || !telemetry_active)
     return;
 
   int ok;
   for (size_t i = 0; writers[i].tag != 0; i++) {
     ok = udp_client.beginPacket(remote_host, remote_udp_port);
     if (!ok) {
-      debug("could not connect to remote host");
+      debug("could not connect to remote host\n");
       return;
     }
     writers[i].writer(packetBuffer);
     udp_client.write(packetBuffer);
     ok = udp_client.endPacket();
     if (!ok) {
-      debug("failed to write packet");
+      debug("failed to write packet\n");
       return;
     }
   }

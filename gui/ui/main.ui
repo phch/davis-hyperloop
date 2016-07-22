@@ -314,6 +314,8 @@
     </property>
     <addaction name="actionSettings"/>
     <addaction name="actionReconnect"/>
+    <addaction name="actionTelemetry_Off"/>
+    <addaction name="actionTelemetry_On"/>
    </widget>
    <addaction name="menuConsole"/>
    <addaction name="menuNetwork"/>
@@ -342,6 +344,16 @@
   <action name="actionReconnect">
    <property name="text">
     <string>&amp;Reconnect</string>
+   </property>
+  </action>
+  <action name="actionTelemetry_Off">
+   <property name="text">
+    <string>Telemetry Off</string>
+   </property>
+  </action>
+  <action name="actionTelemetry_On">
+   <property name="text">
+    <string>Telemetry On</string>
    </property>
   </action>
  </widget>

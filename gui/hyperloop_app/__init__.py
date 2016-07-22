@@ -45,6 +45,8 @@ class MainWindow(QMainWindow):
         pod.connected.connect(self.enable)
         self._ui.actionSettings.triggered.connect(self.networkDialog)
         self._ui.actionReconnect.triggered.connect(pod.begin)
+        self._ui.actionTelemetry_Off.triggered.connect(self.telemetry_off)
+        self._ui.actionTelemetry_On.triggered.connect(self.telemetry_on)
         self._ui.actionConsoleOpen.triggered.connect(self.openConsole)
         pod.add_listener('*', self.appendNetworkLog)
         pod.add_listener('v', self.updateVelocityLCD)
@@ -78,15 +80,20 @@ class MainWindow(QMainWindow):
     def updateDistanceLCD(self, new):
         self._ui.distanceLCD.display(new)
 
+    @pyqtSlot()
+    def telemetry_off(self):
+        self.command.emit('telemetry', '0')
+
+    @pyqtSlot()
+    def telemetry_on(self):
+        self.command.emit('telemetry', '1')
+
     def submitCommand(self):
         tag = self._ui.tagLineEdit.text()
         body = self._ui.bodyLineEdit.text()
         if tag == '' or body == '':
             return
         self.command.emit(tag, body)
-
-    def sendStartMessage(self):
-        return 'start'
 
     def openConsole(self):
         '''Open a console for Python interaction'''
